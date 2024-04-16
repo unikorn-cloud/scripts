@@ -7,7 +7,7 @@
 # NOTE: must be run from the compenent's root directory.
 
 # Grab the repository.
-REPO=$(basename $(pwd))
+REPO=$(basename "$(pwd)")
 
 # Get the environemnt.
 # TODO: getopts
@@ -43,7 +43,7 @@ CRDDIR="${CHARTDIR}/crds"
 
 # Update CRDs if necessary, helm won't do this for you.
 if [[ -d ${CRDDIR} ]]; then
-	kubectl apply -f ${CRDDIR}
+	kubectl apply -f "${CRDDIR}"
 fi
 
 ARGS=()
@@ -52,8 +52,8 @@ ARGS=()
 VALUESFILE="${HOME}/.config/unikorn/${ENVIRONMENT}/${REPO}.yaml"
 
 if [[ -f ${VALUESFILE} ]]; then
-	ARGS+=("-f" ${VALUESFILE})
+	ARGS+=("-f" "${VALUESFILE}")
 fi
 
 # Deploy the actual chart.
-helm upgrade --install --create-namespace -n ${NAMESPACE} ${RELEASE} ${CHARTDIR} ${ARGS[@]}
+helm upgrade --install --create-namespace -n ${NAMESPACE} ${RELEASE} "${CHARTDIR}" "${ARGS[@]}"

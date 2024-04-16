@@ -7,7 +7,7 @@
 # NOTE: must be run from the compenent's root directory.
 
 # Grab the repository.
-REPO=$(basename $(pwd))
+REPO=$(basename "$(pwd)")
 
 # Do any specializations.
 case ${REPO} in

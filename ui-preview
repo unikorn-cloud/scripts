@@ -1,0 +1,22 @@
+#/bin/bash
+
+# Define the environment.
+# TODO: getopts
+ENVIRONMENT="local"
+
+# This must contain:
+# * PUBLIC_OAUTH2_ISSUER
+# * PUBLIC_OAUTH2_CLIENT_ID
+# * PUBLIC_API_HOST
+ENVFILE="${HOME}/.config/unikorn/${ENVIRONMENT}/ui.env"
+
+if [[ ! -f ${ENVFILE} ]]; then
+	echo "Unable to find environment file"
+	exit 1
+fi
+
+set -a
+source ${ENVFILE}
+set +a
+
+npm run dev

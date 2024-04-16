@@ -54,6 +54,16 @@ Test a functional change:
 build && restart
 ```
 
+## Installation
+
+Run:
+
+```shell
+make install
+```
+
+**NOTE**: This defaults to ~/bin, you can set `PREFIX` to modify this.
+
 ## Contribution
 
 Be aware you need to run `shellcheck` and pass before acceptance.

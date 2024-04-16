@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Removes any dangling docker images, or which there will be many.
+
+docker rmi $(docker images -f dangling=true | grep -e \^\< | awk '{ print $3; }')

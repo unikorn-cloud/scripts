@@ -5,4 +5,7 @@
 #
 # NOTE: must be run from the compenent's root directory.
 
-make images-kind-load VERSION=$(cat charts/$(ls charts)/Chart.yaml | yq .version)
+CHART="$(ls charts)"
+CHART_META="charts/${CHART}/Chart.yaml"
+
+make images-kind-load VERSION="$(yq .version "${CHART_META}")"

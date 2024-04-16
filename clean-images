@@ -2,4 +2,5 @@
 
 # Removes any dangling docker images, or which there will be many.
 
-docker rmi $(docker images -f dangling=true | grep -e \^\< | awk '{ print $3; }')
+# shellcheck disable=SC2046
+docker rmi $(docker images -f dangling=true | grep -e ^\< | awk '{ print $3; }')

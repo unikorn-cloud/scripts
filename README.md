@@ -53,3 +53,7 @@ Test a functional change:
 ```shell
 build && restart
 ```
+
+## Contribution
+
+Be aware you need to run `shellcheck` and pass before acceptance.

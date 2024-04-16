@@ -16,7 +16,8 @@ if [[ ! -f ${ENVFILE} ]]; then
 fi
 
 set -a
-source ${ENVFILE}
+# shellcheck disable=SC1090
+source "${ENVFILE}"
 set +a
 
 npm run dev

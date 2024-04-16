@@ -2,5 +2,7 @@
 
 # All Unikorn components use the same build system, so can be built in a generic
 # manner.  This does the build and pushes it into KinD.
+#
+# NOTE: must be run from the compenent's root directory.
 
 make images-kind-load VERSION=$(cat charts/$(ls charts)/Chart.yaml | yq .version)

@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Deploys a unikorn component.  Will only work if the chart version
+# has been bumped, otherwise you will need to manually restart all
+# the pods with kubectl.
+#
+# NOTE: must be run from the compenent's root directory.
+
+# Grab the repository.
+REPO=$(basename $(pwd))
+
+# Get the environemnt.
+# TODO: getopts
+ENVIRONMENT="local"
+
+# Do any specializations.
+case ${REPO} in
+	core)
+		RELEASE=unikorn-core
+		NAMESPACE=unikorn
+		;;
+	identity)
+		RELEASE=unikorn-identity
+		NAMESPACE=unikorn-identity
+		;;
+	unikorn)
+		RELEASE=unikorn
+		NAMESPACE=unikorn
+		;;
+	ui)
+		RELEASE=unikorn-ui
+		NAMESPACE=unikorn-ui
+		;;
+	*)
+		echo "Unrecognized repo ${REPO}"
+		exit 1
+		;;
+esac
+
+# Figure out some constants.
+CHARTDIR="charts/${REPO}"
+CRDDIR="${CHARTDIR}/crds"
+
+# Update CRDs if necessary, helm won't do this for you.
+if [[ -d ${CRDDIR} ]]; then
+	kubectl apply -f ${CRDDIR}
+fi
+
+ARGS=()
+
+# Add an values files you need.
+VALUESFILE="${HOME}/.config/unikorn/${ENVIRONMENT}/${REPO}.yaml"
+
+if [[ -f ${VALUESFILE} ]]; then
+	ARGS+=("-f" ${VALUESFILE})
+fi
+
+# Deploy the actual chart.
+helm upgrade --install --create-namespace -n ${NAMESPACE} ${RELEASE} ${CHARTDIR} ${ARGS[@]}

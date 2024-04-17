@@ -6,27 +6,15 @@
 #
 # NOTE: must be run from the compenent's root directory.
 
-# Grab the repository.
+# A prefix to add to namespaces to avoid clashes
+# TODO: getopts
+NAMESPACE_PREFIX="unikorn"
+
+# Figure out some repo constants.
 REPO=$(basename "$(pwd)")
 
-# Do any specializations.
-case ${REPO} in
-        core)
-                NAMESPACE=unikorn
-                ;;
-        identity)
-                NAMESPACE=unikorn-identity
-                ;;
-        unikorn)
-                NAMESPACE=unikorn
-                ;;
-        ui)
-                NAMESPACE=unikorn-ui
-                ;;
-        *)
-                echo "Unrecognized repo ${REPO}"
-                exit 1
-                ;;
-esac
+# Define some constants for Helm
+NAMESPACE="${NAMESPACE_PREFIX}-${REPO}"
 
-kubectl delete pod --namespace ${NAMESPACE} --all --now
+# Do any specializations.
+kubectl delete pod --namespace "${NAMESPACE}" --all --now

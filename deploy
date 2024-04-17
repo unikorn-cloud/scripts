@@ -6,40 +6,21 @@
 #
 # NOTE: must be run from the compenent's root directory.
 
-# Grab the repository.
-REPO=$(basename "$(pwd)")
-
 # Get the environemnt.
 # TODO: getopts
 ENVIRONMENT="local"
 
-# Do any specializations.
-case ${REPO} in
-	core)
-		RELEASE=unikorn-core
-		NAMESPACE=unikorn
-		;;
-	identity)
-		RELEASE=unikorn-identity
-		NAMESPACE=unikorn-identity
-		;;
-	unikorn)
-		RELEASE=unikorn
-		NAMESPACE=unikorn
-		;;
-	ui)
-		RELEASE=unikorn-ui
-		NAMESPACE=unikorn-ui
-		;;
-	*)
-		echo "Unrecognized repo ${REPO}"
-		exit 1
-		;;
-esac
+# A prefix to add to namespaces to avoid clashes
+# TODO: getopts
+NAMESPACE_PREFIX="unikorn"
 
-# Figure out some constants.
+# Figure out some repo constants.
+REPO=$(basename "$(pwd)")
 CHARTDIR="charts/${REPO}"
 CRDDIR="${CHARTDIR}/crds"
+
+# Define some constants for Helm
+NAMESPACE="${NAMESPACE_PREFIX}-${REPO}"
 
 # Update CRDs if necessary, helm won't do this for you.
 if [[ -d ${CRDDIR} ]]; then
@@ -56,4 +37,4 @@ if [[ -f ${VALUESFILE} ]]; then
 fi
 
 # Deploy the actual chart.
-helm upgrade --install --create-namespace -n ${NAMESPACE} ${RELEASE} "${CHARTDIR}" "${ARGS[@]}"
+helm upgrade --install --create-namespace -n "${NAMESPACE}" "${REPO}" "${CHARTDIR}" "${ARGS[@]}"

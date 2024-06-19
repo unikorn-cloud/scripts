@@ -25,6 +25,16 @@ Second most useful script, this deploys the component to KinD.
 You will need to provide Helm values files to override default behaviour, which will be broken.
 Only restarts all services if the Helm chart version has changed, or their pod templates have.
 
+Deployments are usually useless without Helm `values.yaml` files.
+These are located in `~/.config/unikorn/local` by default, and should be named after the service e.g. `core.yaml`, `identity.yaml` and so on (derived from the chart directory).
+A special `global.yaml` file allows global parameters to be set for all deployments.
+
+The deploy command has the following flags that may be of use:
+
+* `-e <environment>` choose the environment to use defined in `~/.config/unikorn/${environment}` when looking up values files.
+* `-t` dump the deployment out as raw resources, useful for piping into `kubeclt diff -f -` to make sure nothing untoward has changed.
+* `-p` do a production deployment using the actual helm repository, as opposed to the local source tree.
+
 ### restart
 
 Like `deploy`, but just deletes all the pods.

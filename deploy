@@ -7,34 +7,84 @@
 # NOTE: must be run from the compenent's root directory.
 
 # Get the environemnt.
-# TODO: getopts
 ENVIRONMENT="local"
 
 # A prefix to add to namespaces to avoid clashes
-# TODO: getopts
 NAMESPACE_PREFIX="unikorn"
 
+# A production deployment will use public helm charts.
+PRODUCTION=""
+
+# Template renders the chart to stdout, very useful if you are piping
+# the output into kubectl diff...
+TEMPLATE=""
+
+while getopts "e:n:pt" opt; do
+	case "${opt}" in
+		e)
+			ENVIRONMENT=${OPTARG}
+			;;
+		n)
+			NAMESPACE_PREFIX=${OPTARG}
+			;;
+		p)
+			PRODUCTION="true"
+			;;
+		t)
+			TEMPLATE="true"
+			;;
+		*)
+			echo "Unexpected flag -${opt}"
+			exit 1
+	esac
+done
+
 # Figure out some repo constants.
-REPO=$(basename "$(pwd)")
-CHARTDIR="charts/${REPO}"
-CRDDIR="${CHARTDIR}/crds"
+GIT_REPO=""
+if [[ -f go.mod ]]; then
+	GIT_REPO="$(head -n1 go.mod | awk '{print $2}')"
+elif [[ -f package.json ]]; then
+	GIT_REPO="$(jq -r .repository.url package.json | sed 's,http[s]\?://,,')"
+fi
+GIT_ORG_NAME=$(echo -n "${GIT_REPO}" | cut -d '/' -f 2)
+GIT_REPO_NAME=$(echo -n "${GIT_REPO}" | cut -d '/' -f 3)
+HELM_REPO="https://${GIT_ORG_NAME}.github.io/${GIT_REPO_NAME}"
+HELM_CHART_DIR="charts/${GIT_REPO_NAME}"
+HELM_CHART=$(yq .name "${HELM_CHART_DIR}/Chart.yaml")
+HELM_CRD_DIR="${HELM_CHART_DIR}/crds"
 
 # Define some constants for Helm
-NAMESPACE="${NAMESPACE_PREFIX}-${REPO}"
-
-# Update CRDs if necessary, helm won't do this for you.
-if [[ -d ${CRDDIR} ]]; then
-	kubectl apply -f "${CRDDIR}"
-fi
+NAMESPACE="${NAMESPACE_PREFIX}-${GIT_REPO_NAME}"
 
 ARGS=()
 
 # Add an values files you need.
-VALUESFILE="${HOME}/.config/unikorn/${ENVIRONMENT}/${REPO}.yaml"
+GLOBAL_VALUES_FILE="${HOME}/.config/unikorn/${ENVIRONMENT}/global.yaml"
 
-if [[ -f ${VALUESFILE} ]]; then
-	ARGS+=("-f" "${VALUESFILE}")
+if [[ -f ${GLOBAL_VALUES_FILE} ]]; then
+	ARGS+=("-f" "${GLOBAL_VALUES_FILE}")
 fi
 
-# Deploy the actual chart.
-helm upgrade --install --create-namespace -n "${NAMESPACE}" "${REPO}" "${CHARTDIR}" "${ARGS[@]}"
+VALUES_FILE="${HOME}/.config/unikorn/${ENVIRONMENT}/${GIT_REPO_NAME}.yaml"
+
+if [[ -f ${VALUES_FILE} ]]; then
+	ARGS+=("-f" "${VALUES_FILE}")
+fi
+
+COMMAND=(upgrade --install --create-namespace)
+
+# If we are doing a non-template run, update the CRDs as helm doesn't do this.
+if [[ -z ${TEMPLATE} ]]; then
+	if [[ -d ${HELM_CRD_DIR} ]]; then
+		kubectl apply -f "${HELM_CRD_DIR}"
+	fi
+else
+	COMMAND=(template --no-hooks --skip-tests)
+fi
+
+if [[ -z ${PRODUCTION} ]]; then
+	# Deploy the actual chart.
+	helm "${COMMAND[@]}" -n "${NAMESPACE}" "${GIT_REPO_NAME}" "${HELM_CHART_DIR}" "${ARGS[@]}"
+else
+	helm "${COMMAND[@]}" -n "${NAMESPACE}" "${GIT_REPO_NAME}" "${HELM_CHART}" --repo "${HELM_REPO}" "${ARGS[@]}"
+fi

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# All Unikorn components use the same build system, so can be built in a generic
+# manner.  This releases a component.
+#
+# NOTE: must be run from the compenent's root directory.
+
+CHART="$(ls charts)"
+CHART_META="charts/${CHART}/Chart.yaml"
+TAG="$(yq .version "${CHART_META}")"
+
+git tag "${TAG}"
+git push origin "${TAG}"

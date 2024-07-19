@@ -40,6 +40,10 @@ The deploy command has the following flags that may be of use:
 Like `deploy`, but just deletes all the pods.
 This is used when a deploy would do nothing, e.g. the pod images or arguments have't changed but you have a new functional change pushed with `build`.
 
+### release
+
+Uses the canonical version in Chart.yaml to tag and push, creating a release.
+
 ### ui-preview
 
 UI developer mode script, which has live reload and debug information readily available in your browser.

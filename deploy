@@ -4,7 +4,14 @@
 # has been bumped, otherwise you will need to manually restart all
 # the pods with kubectl.
 #
-# NOTE: must be run from the compenent's root directory.
+# NOTE: must be run from the component's root directory.
+
+# Check if gsed is available for MacOS users, otherwise fallback to sed
+if command -v gsed &> /dev/null; then
+    SED_CMD="gsed"
+else
+    SED_CMD="sed"
+fi
 
 # Get the environemnt.
 ENVIRONMENT="local"
@@ -44,7 +51,7 @@ GIT_REPO=""
 if [[ -f go.mod ]]; then
 	GIT_REPO="$(head -n1 go.mod | awk '{print $2}')"
 elif [[ -f package.json ]]; then
-	GIT_REPO="$(jq -r .repository.url package.json | sed 's,http[s]\?://,,')"
+	GIT_REPO="$(jq -r .repository.url package.json | $SED_CMD 's,http[s]\?://,,')"
 fi
 GIT_ORG_NAME=$(echo -n "${GIT_REPO}" | cut -d '/' -f 2)
 GIT_REPO_NAME=$(echo -n "${GIT_REPO}" | cut -d '/' -f 3)

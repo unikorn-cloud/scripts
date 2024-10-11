@@ -8,7 +8,6 @@ Useful shiz for developing Unikorn.
 ## Prerequisites
 
 * GNU `make`
-* GNU `sed` (default on Linux, `brew install gnused` on MacOS)
 * `go`
 * `kubectl`
 * `jq`

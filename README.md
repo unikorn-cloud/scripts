@@ -32,7 +32,7 @@ A special `global.yaml` file allows global parameters to be set for all deployme
 The deploy command has the following flags that may be of use:
 
 * `-e <environment>` choose the environment to use defined in `~/.config/unikorn/${environment}` when looking up values files.
-* `-t` dump the deployment out as raw resources, useful for piping into `kubeclt diff -f -` to make sure nothing untoward has changed.
+* `-t` dump the deployment out as raw resources, useful for piping into `kubectl diff -f -` to make sure nothing untoward has changed.
 * `-p` do a production deployment using the actual helm repository, as opposed to the local source tree.
 
 ### restart

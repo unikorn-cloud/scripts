@@ -20,7 +20,10 @@ PRODUCTION=""
 # the output into kubectl diff...
 TEMPLATE=""
 
-while getopts "e:n:pt" opt; do
+# Allow development chart versions.
+DEVELOPMENT=""
+
+while getopts "e:n:v:ptd" opt; do
 	case "${opt}" in
 		e)
 			ENVIRONMENT=${OPTARG}
@@ -28,11 +31,17 @@ while getopts "e:n:pt" opt; do
 		n)
 			NAMESPACE_PREFIX=${OPTARG}
 			;;
+		v)
+			VERSION=${OPTARG}
+			;;
 		p)
 			PRODUCTION="true"
 			;;
 		t)
 			TEMPLATE="true"
+			;;
+		d)
+			DEVELOPMENT="true"
 			;;
 		*)
 			echo "Unexpected flag -${opt}"
@@ -72,6 +81,16 @@ if [[ -f ${VALUES_FILE} ]]; then
 	ARGS+=("-f" "${VALUES_FILE}")
 fi
 
+if [[ -n ${DEVELOPMENT} ]]; then
+	ARGS+=("--devel")
+fi
+
+# Helm does a lexical compare of pre-releases so rc9 will beat rc10, thus we
+# should allow an explicit version.
+if [[ -n ${VERSION} ]]; then
+	ARGS+=("--version" "${VERSION}")
+fi
+
 COMMAND=(upgrade --install --create-namespace)
 
 # If we are doing a non-template run, update the CRDs as helm doesn't do this.
@@ -87,5 +106,6 @@ if [[ -z ${PRODUCTION} ]]; then
 	# Deploy the actual chart.
 	helm "${COMMAND[@]}" -n "${NAMESPACE}" "${GIT_REPO_NAME}" "${HELM_CHART_DIR}" "${ARGS[@]}"
 else
+	helm repo update "${NAMESPACE}" > /dev/null 2>&1
 	helm "${COMMAND[@]}" -n "${NAMESPACE}" "${GIT_REPO_NAME}" "${HELM_CHART}" --repo "${HELM_REPO}" "${ARGS[@]}"
 fi

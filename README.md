@@ -12,6 +12,7 @@ Useful shiz for developing Unikorn.
 * `kubectl`
 * `jq`
 * `yq`
+* `column`
 
 ## Scripts
 
@@ -53,6 +54,10 @@ You will need to define a few environment variables for your setup, see the code
 
 Docker images are big, and if you are compiling 20 a day, that's a lot of space.
 This deletes any danging images.
+
+### uv
+
+Display all deployed unikorn versions.
 
 ## Typical Usage
 
